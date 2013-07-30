@@ -17,9 +17,11 @@ skillset = {}
 with open(skillset_name + '.csv', 'rb') as csvfile:
     skillsreader = csv.reader(csvfile, delimiter=',', quotechar='"')
     for row in skillsreader:
-        skill_name, required_level = row
+        skill_group, skill_name, required_level = row
+        required_level = int(required_level)
+        if not 1 <= required_level <= 5:
+            continue
         skill_id = sdb.skill_id(skill_name)
-        skill_group = sdb.skill_group(skill_id)
         if skill_group not in skillset:
             skillset[skill_group] = []
         skillset[skill_group].append((skill_name, skill_id, required_level))
@@ -33,13 +35,16 @@ for character in key_info.result.key.rowset.row:
     char_name = character.attrib['characterName']
     characters.append((char_id, char_name))
 
+title = "Skillcheck - %s" % skillset_name
+
 print('<!DOCTYPE html>')
 print('<html>')
 print('<head>')
-print('<title>Skill check</title>')
+print('<title>%s</title>' % title)
 print('<link rel="stylesheet" type="text/css" href="style.css" />')
 print('</head>')
 print('<body>')
+print('<h1>%s</h1>' % title)
 
 for character in characters:
     char_id, char_name = character
@@ -53,9 +58,9 @@ for character in characters:
         trained_skills[skill_name] = required_level
 
     print('<h2>%s</h2>' % char_name)
+    low_skill_counter = 0
     for group in sorted(skillset.keys()):
-        print('<h3>%s</h3>' % group)
-        print('<table class="skills">')
+        groupheader_printed = False
 
         for skill in sorted(skillset[group]):
             skill_name, skill_id, required_level = skill
@@ -66,6 +71,10 @@ for character in characters:
                 trained_level = 0
 
             if trained_level < required_level:
+                if not groupheader_printed:
+                    print('<h3>%s</h3>' % group)
+                    print('<table class="skills">')
+                    groupheader_printed = True
                 print('<tr class="lowskill">')
                 print('<td><a class="igblink" onclick="CCPEVE.showInfo(%s)">%s'
                       '</a></td>' % (skill_id, skill_name))
@@ -75,7 +84,13 @@ for character in characters:
                                                             required_level))
                 print('</tr>')
 
-        print('</table>')
+                low_skill_counter += 1
+
+        if groupheader_printed:
+            print('</table>')
+
+    if low_skill_counter == 0:
+        print('<span>Skill requirements met</span>')
 
 print('</body>')
 print('</html>')

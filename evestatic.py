@@ -32,10 +32,10 @@ class StaticDB(object):
         return result[0]
 
     def skill_group(self, skillID):
-        self._cursor.execute("SELECT g.marketGroupName"
+        self._cursor.execute("SELECT g.groupName"
                              " FROM invtypes t"
-                             " JOIN invmarketgroups g"
-                             " ON t.marketGroupID = g.marketGroupID"
+                             " JOIN invgroupd g"
+                             " ON t.groupID = g.groupID"
                              " WHERE t.typeID = :id",
                              {'id': skillID})
         result = self._cursor.fetchone()
