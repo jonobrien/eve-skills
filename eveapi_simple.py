@@ -12,7 +12,7 @@ class APIError(Exception):
     pass
 
 
-def query(query, args):
+def query(query, args=None):
     """Query the eve online API and return a result object.
 
     Example: query('/eve/CharacterID', 'EVE University')"""
@@ -25,7 +25,9 @@ def query(query, args):
     return objectify.fromstring(response.read())
 
 
-def _make_query_string(query, args):
+def _make_query_string(query, args=None):
+    if args is None:
+        args = {}
     if not query.startswith('/'):
         query = '/' + query
     if not query.endswith(".xml.aspx"):
