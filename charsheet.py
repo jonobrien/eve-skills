@@ -35,8 +35,8 @@ for character in characters:
     for skill in charsheet.xpath("result/rowset[@name='skills']/row"):
         skill_id = int(skill.attrib['typeID'])
         skill_level = int(skill.attrib['level'])
-        skill_name = sdb.getSkillName(skill_id)
-        skill_group = sdb.getSkillGroup(skill_id)
+        skill_name = sdb.skill_name(skill_id)
+        skill_group = sdb.skill_group(skill_id)
         if skill_group not in skills:
             skills[skill_group] = []
         skills[skill_group].append((skill_name, skill_id, skill_level))

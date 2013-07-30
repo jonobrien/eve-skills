@@ -15,14 +15,23 @@ class StaticDB(object):
     def __del__(self):
         self._connection.close()
 
-    def getSkillName(self, skillID):
+    def skill_id(self, skill_name):
+        self._cursor.execute("SELECT typeID FROM invtypes"
+                             " WHERE typeName = :name",
+                             {'name': skill_name})
+        result = self._cursor.fetchone()
+        self._cursor.fetchall()
+        return result[0]
+
+    def skill_name(self, skillID):
         self._cursor.execute("SELECT typeName"
                              " FROM invtypes WHERE typeID = :id",
                              {'id': skillID})
         result = self._cursor.fetchone()
+        self._cursor.fetchall()
         return result[0]
 
-    def getSkillGroup(self, skillID):
+    def skill_group(self, skillID):
         self._cursor.execute("SELECT g.marketGroupName"
                              " FROM invtypes t"
                              " JOIN invmarketgroups g"
@@ -30,4 +39,5 @@ class StaticDB(object):
                              " WHERE t.typeID = :id",
                              {'id': skillID})
         result = self._cursor.fetchone()
+        self._cursor.fetchall()
         return result[0]
