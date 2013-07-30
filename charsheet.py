@@ -33,20 +33,27 @@ for character in characters:
     charsheet = api.query('/char/CharacterSheet', api_args)
     skills = {}
     for skill in charsheet.xpath("result/rowset[@name='skills']/row"):
-        skill_id = skill.attrib['typeID']
-        skill_level = skill.attrib['level']
+        skill_id = int(skill.attrib['typeID'])
+        skill_level = int(skill.attrib['level'])
         skill_name = sdb.getSkillName(skill_id)
         skill_group = sdb.getSkillGroup(skill_id)
         if skill_group not in skills:
             skills[skill_group] = []
-        skills[skill_group].append((skill_name, skill_level))
+        skills[skill_group].append((skill_name, skill_id, skill_level))
 
     print('<h2>%s</h2>' % char_name)
     for group in sorted(skills.keys()):
         print('<h3>%s</h3>' % group)
         print('<table class="skills">')
         for skill in sorted(skills[group]):
-            print('<tr><td>%s</td><td>%s</td></tr>' % skill)
+            skill_name, skill_id, skill_level = skill
+            print('<tr>')
+            print('<td>' if skill_level < 5 else '<td class="l5skill">')
+            print('<a class="igblink" onclick="CCPEVE.showInfo(%s)">%s</a>'
+                  '</td>' % (skill_id, skill_name))
+            print('<td><img src="gfx/level%s.png" alt="Level %s" /></td>'
+                  % (skill_level, skill_level))
+            print('</tr>')
         print('</table>')
 
 print('</body>')
