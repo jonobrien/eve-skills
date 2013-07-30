@@ -45,7 +45,7 @@ for character in characters:
     for group in sorted(skills.keys()):
         print('<h3>%s</h3>' % group)
         print('<table class="skills">')
-        for skill in skills[group]:
+        for skill in sorted(skills[group]):
             print('<tr><td>%s</td><td>%s</td></tr>' % skill)
         print('</table>')
 
