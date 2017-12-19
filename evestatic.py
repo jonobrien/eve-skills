@@ -16,7 +16,7 @@ class StaticDB(object):
         self._connection.close()
 
     def skill_id(self, skill_name):
-        self._cursor.execute("SELECT typeID FROM invtypes"
+        self._cursor.execute("SELECT typeID FROM invTypes"
                              " WHERE typeName = :name",
                              {'name': skill_name})
         result = self._cursor.fetchone()
