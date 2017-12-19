@@ -25,7 +25,7 @@ class StaticDB(object):
 
     def skill_name(self, skillID):
         self._cursor.execute("SELECT typeName"
-                             " FROM invtypes WHERE typeID = :id",
+                             " FROM invTypes WHERE typeID = :id",
                              {'id': skillID})
         result = self._cursor.fetchone()
         self._cursor.fetchall()
@@ -33,8 +33,8 @@ class StaticDB(object):
 
     def skill_group(self, skillID):
         self._cursor.execute("SELECT g.groupName"
-                             " FROM invtypes t"
-                             " JOIN invgroupd g"
+                             " FROM invTypes t"
+                             " JOIN invGroups g"
                              " ON t.groupID = g.groupID"
                              " WHERE t.typeID = :id",
                              {'id': skillID})
