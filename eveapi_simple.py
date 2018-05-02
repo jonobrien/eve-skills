@@ -4,32 +4,41 @@
 
 """eveapi_simple.py: simple eve api query helper"""
 
-from httplib import HTTPSConnection
-from lxml import objectify
+#from httplib import HTTPSConnection
+#from lxml import objectify
+
+from esipy import App, EsiClient
 
 
 class APIError(Exception):
     pass
 
+class ESIClient():
+    def __init__(self):
+        self.app = App.create(url="https://esi.tech.ccp.is/latest/swagger.json?datasource=tranquility")
+        self.client = EsiClient(
+            header={'User-Agent': 'EVE-SKILLS'},
+            raw_body_only=False,  # parse json automatically, slow, bad performance
+        )
 
-def query(query, args=None):
+def get_skills(cli, args=None):
     """Query the eve online API and return a result object."""
-    query = _make_query_string(query, args)
-    con = HTTPSConnection('api.eveonline.com')
-    con.request('GET', query)
-    response = con.getresponse()
-    if response.status != 200:
-        raise APIError("HTTPS GET failed")
-    return objectify.fromstring(response.read())
 
 
-def _make_query_string(query, args=None):
-    if args is None:
-        args = {}
-    if not query.startswith('/'):
-        query = '/' + query
-    if not query.endswith(".xml.aspx"):
-        query += '.xml.aspx'
-    query_str = '?'.join(
-        [query, '&'.join(['='.join(map(str, i)) for i in args.items()])])
-    return query_str.replace(' ', '%20')
+
+    # generate the operation tuple
+    # the parameters given are the actual parameters the endpoint requires
+    market_order_operation = cli.app.op['get_markets_region_id_orders'](
+        region_id=10000002,
+        type_id=34,
+        order_type='all',
+    )
+
+    response = cli.client.request(market_order_operation)
+
+    return response.data
+
+def get_characters(cli):
+    return {'message': 'success'}
+
+

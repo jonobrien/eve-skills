@@ -15,8 +15,10 @@ python charsheet.py <apikey> <vCode> > <output.html>
 
 ## skillcheck
 
+Generates an html page showing skills missing from character that the csv file contains
+
 ```
-python skillcheck.py <csv-filename-no-extension> <apikey> <vCode> > <output.html>
+python skillcheck.py <csv-file> <apikey> <vCode> > <output.html>
 ```
 
 

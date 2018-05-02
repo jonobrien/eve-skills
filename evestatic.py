@@ -9,11 +9,13 @@ import sqlite3
 
 class StaticDB(object):
     def __init__(self):
-        self._connection = sqlite3.connect('evestatic.db')
+        self._connection = sqlite3.connect('./sde/sde.db')
         self._cursor = self._connection.cursor()
+
 
     def __del__(self):
         self._connection.close()
+
 
     def skill_id(self, skill_name):
         self._cursor.execute("SELECT typeID FROM invTypes"
@@ -23,6 +25,7 @@ class StaticDB(object):
         self._cursor.fetchall()
         return result[0]
 
+
     def skill_name(self, skillID):
         self._cursor.execute("SELECT typeName"
                              " FROM invTypes WHERE typeID = :id",
@@ -30,6 +33,7 @@ class StaticDB(object):
         result = self._cursor.fetchone()
         self._cursor.fetchall()
         return result[0]
+
 
     def skill_group(self, skillID):
         self._cursor.execute("SELECT g.groupName"
