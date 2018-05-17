@@ -14,7 +14,7 @@ class CharSheet(MethodView):
     def get(self):
         characters = []
         client = api.ESIClient()
-        key_info = api.get_characters(client)
+        characters = api.get_character(client)  # [(id, name)]
 
 
         html = '<!DOCTYPE html>'

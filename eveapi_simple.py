@@ -14,6 +14,9 @@ class APIError(Exception):
     pass
 
 class ESIClient():
+    """
+    didn't use esiSecurity for callback handling as flask seems fine
+    """
     def __init__(self):
         self.app = App.create(url="https://esi.tech.ccp.is/latest/swagger.json?datasource=tranquility")
         self.client = EsiClient(
@@ -38,7 +41,10 @@ def get_skills(cli, args=None):
 
     return response.data
 
-def get_characters(cli):
+def get_character(cli):
+    """
+    esi uses access_tokens associated with a single toon
+    """
     return {'message': 'success'}
 
 

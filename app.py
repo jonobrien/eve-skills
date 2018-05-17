@@ -44,6 +44,9 @@ def unsupported_method(error):
 
 
 class Login(MethodView):
+    """
+    redirect to skillsheet
+    """
     def get(self):
         resp = make_response(redirect('https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri=http://localhost:1337/api/v1/skillsheet&client_id=470e0c34a5b340f585f7fe793be9784e&scope=esi-fittings.read_fittings.v1 esi-skills.read_skills.v1'))
         return resp
