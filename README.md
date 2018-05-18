@@ -1,28 +1,34 @@
 eve-skills
 ==========
 
-Create a simple HTML skill overview by supplying an EVE Online API key.  Uses the soon-deprecated xml api for character/api access. Uses the SDE for skill information.
+Create a simple HTML skill overview by supplying logging into your account. Uses the SDE for skill information.
 
-## charsheet
+## skillsheet
 
 ```
-python charsheet.py <apikey> <vCode> > <output.html>
+python app.py
 ```
+navigate to localhost:1337/login
 
-
-
+get redirected to login, and back to your skills
 
 
 ## skillcheck
 
 Generates an html page showing skills missing from character that the csv file contains
 
-```
-python skillcheck.py <csv-file> <apikey> <vCode> > <output.html>
-```
+csv file in root directory called test.csv
 
+```
+python app.py
+```
+navigate to localhost:1337/login
 
-csv file with `<skill group, name, required level>` to compare against api:
+get redirected to login, then back to your skills
+
+then click the skillcheck button
+
+requires a csv file with `<skill group, name, required level>` to compare against api:
 
 ```
 Gunnery,Gunnery,5

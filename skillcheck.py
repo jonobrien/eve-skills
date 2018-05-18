@@ -9,17 +9,38 @@ from flask.views import MethodView
 import csv
 import eveapi_simple as api
 from evestatic import StaticDB
+from urllib.parse import parse_qs
+
+from esipy.exceptions import APIException
+
+
+
 
 class SkillCheck(MethodView):
     def get(self, token):
         """
-        token is filename.csv from the url
+        token is urlencode({'n':cName, 'cid':cID, 'rtok':cli.token['refresh_token']})
         """
         sdb = StaticDB()
 
-        skillset_name = token
+        data = parse_qs(token)
+
+        data = parse_qs(token)
+        cName = data['n'][0]
+        cid = data['cid'][0]
+        rTok = data['rtok'][0]
+        print(rTok)
+        cli = None
+        try:  # refresh page, just relogin instead of storing tokens between sessions (bad)
+            cli = api.ESIClient(rTok, refresh=True)
+        except APIException:
+            return make_response(redirect('/api/v1/login'))
+        skillset_name = 'test.csv'
+
+
         skillset = {}
-        with open(skillset_name, 'rb') as csvfile:
+        skillset_name = 'test.csv'
+        with open(skillset_name, 'r') as csvfile:
             skillsreader = csv.reader(csvfile, delimiter=',', quotechar='"')
             for row in skillsreader:
                 skill_group, skill_name, required_level = row
@@ -33,69 +54,61 @@ class SkillCheck(MethodView):
 
         #api_args = {'keyID': argv[2], 'vCode': argv[3]}
 
-        characters = []
-        key_info = api.query('/account/APIKeyInfo', api_args)
-        for character in key_info.result.key.rowset.row:
-            char_id = character.attrib['characterID']
-            char_name = character.attrib['characterName']
-            characters.append((char_id, char_name))
 
         title = "Skillcheck - %s" % skillset_name
 
-        print('<!DOCTYPE html>')
-        print('<html>')
-        print('<head>')
-        print('<title>%s</title>' % title)
-        print('<link rel="stylesheet" type="text/css" href="style.css" />')
-        print('</head>')
-        print('<body>')
-        print('<h1>%s</h1>' % title)
+        html = '<!DOCTYPE html>'
+        html += '<html>'
+        html += '<head>'
+        html += '<title>%s</title>' % title
+        html += '<link rel="stylesheet" type="text/css" href="/static/style.css" />'
+        html += '</head>'
+        html += '<body>'
+        html += '<br><br>'
+        html += '<a href=/api/v1/login><img src=https://web.ccpgamescdn.com/eveonlineassets/developers/eve-sso-login-black-small.png /></a>'
+        html += '<br><br>'
+        html += 're-login to see other toons on account'
+        html += '<h1>%s</h1>' % title
 
-        for character in characters:
-            char_id, char_name = character
-            api_args['characterID'] = char_id
-            charsheet = api.query('/char/CharacterSheet', api_args)
-            trained_skills = {}
-            for skill in charsheet.xpath("result/rowset[@name='skills']/row"):
-                skill_id = int(skill.attrib['typeID'])
-                required_level = int(skill.attrib['level'])
-                skill_name = sdb.skill_name(skill_id)
-                trained_skills[skill_name] = required_level
+        char_id, char_name = (cid, cName)
+        charsheet = api.get_skills(cli, cid)
+        trained_skills = {}
+        for skill in charsheet['skills']:
+            skill_id = int(skill['skill_id'])
+            skill_level = int(skill['trained_skill_level'])
+            skill_name = sdb.skill_name(skill_id)
+            trained_skills[skill_name] = required_level
 
-            print('<h2>%s</h2>' % char_name)
-            low_skill_counter = 0
-            for group in sorted(skillset.keys()):
-                groupheader_printed = False
+        html += '<h2>{0}</h2>'.format(char_name)
+        low_skill_counter = 0
+        for group in sorted(skillset.keys()):
+            groupheader_printed = False
 
-                for skill in sorted(skillset[group]):
-                    skill_name, skill_id, required_level = skill
+            for skill in sorted(skillset[group]):
+                skill_name, skill_id, required_level = skill
 
-                    if skill_name in trained_skills:
-                        trained_level = trained_skills[skill_name]
-                    else:
-                        trained_level = 0
+                if skill_name in trained_skills:
+                    trained_level = trained_skills[skill_name]
+                else:
+                    trained_level = 0
 
-                    if trained_level < required_level:
-                        if not groupheader_printed:
-                            print('<h3>%s</h3>' % group)
-                            print('<table class="skills">')
-                            groupheader_printed = True
-                        print('<tr class="lowskill">')
-                        print('<td><a class="igblink" onclick="CCPEVE.showInfo(%s)">%s'
-                              '</a></td>' % (skill_id, skill_name))
-                        print('<td><img style="background:url(gfx/level{1}_red.png)"'
-                              ' src="gfx/level{0}.png"'
-                              ' alt="Level {0}/{1}" /></td>'.format(trained_level,
-                                                                    required_level))
-                        print('</tr>')
+                if trained_level < required_level:
+                    if not groupheader_printed:
+                        html += '<h3>{0}</h3>'.format(group)
+                        html += '<table class="skills">'
+                        groupheader_printed = True
 
-                        low_skill_counter += 1
+                    html += '<tr class="lowskill">'
+                    html += '<td><a class="igblink" onclick="CCPEVE.showInfo({0})">{1}</a></td>'.format(skill_id, skill_name)
+                    html += '<td><img style="background:url(/static/gfx/level{1}_red.png)" src="/static/gfx/level{0}.png" alt="Level {0}/{1}" /></td>'.format(trained_level, required_level)
+                    html += '</tr>'
+                    low_skill_counter += 1
 
-                if groupheader_printed:
-                    print('</table>')
+            if groupheader_printed:
+                html += '</table>'
 
-            if low_skill_counter == 0:
-                print('<span>Skill requirements met</span>')
+        if low_skill_counter == 0:
+            html += '<span>Skill requirements met</span>'
 
-        print('</body>')
-        print('</html>')
+        html += '</body></html>'
+        return html

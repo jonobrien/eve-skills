@@ -1,6 +1,6 @@
 import os
 from flask import Flask, redirect, make_response
-from charsheet import CharSheet
+from skillsheet import SkillSheet
 from skillcheck import SkillCheck
 from flask.views import MethodView
 
@@ -8,10 +8,13 @@ from flask.views import MethodView
 VERSION_1 = '/api/v1'
 NO_METHOD = 405
 
+client_id = os.environ.get('EVE_SKILLS_CID')
+callback_url = os.environ.get('EVE_SKILLS_REDIR')
+root_url = 'https://login.eveonline.com/oauth/authorize'
+scopes = 'esi-skills.read_skills.v1 esi-assets.read_assets.v1'
 
 
-
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 app.debug = True  # restart server on edits
 
 
@@ -48,7 +51,7 @@ class Login(MethodView):
     redirect to skillsheet
     """
     def get(self):
-        resp = make_response(redirect('https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri=http://localhost:1337/api/v1/skillsheet&client_id=470e0c34a5b340f585f7fe793be9784e&scope=esi-fittings.read_fittings.v1 esi-skills.read_skills.v1'))
+        resp = make_response(redirect('{0}?response_type=code&redirect_uri={1}&client_id={2}&scope={3}'.format(root_url, callback_url, client_id, scopes)))
         return resp
 
 app.add_url_rule(
@@ -59,7 +62,7 @@ app.add_url_rule(
 
 app.add_url_rule(
     '{0}/skillsheet'.format(VERSION_1),
-    view_func=CharSheet.as_view('sheet')
+    view_func=SkillSheet.as_view('sheet')
 )  # GET
 
 
