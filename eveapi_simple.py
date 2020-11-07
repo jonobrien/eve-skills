@@ -21,7 +21,7 @@ class ESIClient():
         self.client_id = os.environ.get('EVE_SKILLS_CID')
         self.secret_id = os.environ.get('EVE_SKILLS_SECRET')
         self.redir_url = os.environ.get('EVE_SKILLS_REDIR')
-        self.app = App.create(url="https://esi.tech.ccp.is/latest/swagger.json?datasource=tranquility")
+        self.app = App.create(url="https://esi.evetech.net/latest/swagger.json?datasource=tranquility")
         self.security = EsiSecurity(
             app=self.app,
             redirect_uri=self.redir_url,
